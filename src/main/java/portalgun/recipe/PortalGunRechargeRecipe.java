@@ -34,8 +34,8 @@ public class PortalGunRechargeRecipe extends CustomRecipe {
         );
     }
     
-    public PortalGunRechargeRecipe(ResourceLocation id, CraftingBookCategory category) {
-        super(id, category);
+    public PortalGunRechargeRecipe(CraftingBookCategory category) {
+        super(category);
     }
     
     @Override
@@ -68,47 +68,4 @@ public class PortalGunRechargeRecipe extends CustomRecipe {
     public RecipeSerializer<?> getSerializer() {
         return SERIALIZER;
     }
-    
-    // MC's recipe book is not designed for dynamic recipes
-    // In ServerPlaceRecipe#addItemToSlot, it uses the item id to recreate the default item stack
-    // In Inventory#findSlotMatchingUnusedItem, it cannot pick items with custom nbt
-    // So the recharging recipe cannot work with recipe book
-    
-//    /**
-//     * Make it to be in the recipe book.
-//     * {@link net.minecraft.stats.ServerRecipeBook#addRecipes(Collection, ServerPlayer)}
-//     */
-//    @Override
-//    public boolean isSpecial() {
-//        return false;
-//    }
-//
-//    @Override
-//    public NonNullList<Ingredient> getIngredients() {
-//        NonNullList<Ingredient> ingredients = NonNullList.withSize(
-//            2, Ingredient.EMPTY
-//        );
-//
-//        ingredients.set(0, Ingredient.of(
-//            new PortalGunItem.ItemInfo(
-//                BlockList.createDefault(),
-//                0,
-//                PortalGunConfig.get().maxEnergy
-//            ).toStack()
-//        ));
-//        ingredients.set(1, Ingredient.of(
-//            new ItemStack(Items.NETHER_STAR)
-//        ));
-//
-//        return ingredients;
-//    }
-//
-//    @Override
-//    public ItemStack getResultItem(RegistryAccess registryAccess) {
-//        return new PortalGunItem.ItemInfo(
-//            BlockList.createDefault(),
-//            PortalGunConfig.get().maxEnergy,
-//            PortalGunConfig.get().maxEnergy
-//        ).toStack();
-//    }
 }

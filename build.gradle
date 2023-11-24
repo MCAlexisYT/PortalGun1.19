@@ -85,7 +85,7 @@ dependencies {
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
     modImplementation ("software.bernie.geckolib:${geckolib_path}") {
-        transitive(false)
+
     }
 
     modImplementation("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
@@ -93,7 +93,7 @@ dependencies {
     }
     modImplementation "maven.modrinth:modmenu:${modmenu_version}"
 
-    modImplementation "maven.modrinth:sodium:mc1.20.1-0.5.2"
+//    modImplementation "maven.modrinth:sodium:mc1.20.1-0.5.2"
 
 //    modImplementation 'maven.modrinth:iris:1.6.1+1.19.4'
 //    implementation "org.anarres:jcpp:1.4.14" // for iris

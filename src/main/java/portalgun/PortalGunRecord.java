@@ -21,7 +21,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PortalGunRecord extends SavedData {
-    private static Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     
     public static enum PortalGunKind {
         _2x1;
@@ -143,11 +143,14 @@ public class PortalGunRecord extends SavedData {
         ServerLevel overworld = MiscHelper.getServer().overworld();
         
         return overworld.getDataStorage().computeIfAbsent(
-            PortalGunRecord::load,
-            () -> {
-                Helper.log("Portal gun record initialized ");
-                return new PortalGunRecord(new HashMap<>());
-            },
+            new SavedData.Factory<>(
+                () -> {
+                    LOGGER.info("Portal gun record initialized ");
+                    return new PortalGunRecord(new HashMap<>());
+                },
+                PortalGunRecord::load,
+                null
+            ),
             "portal_gun_record"
         );
     }
