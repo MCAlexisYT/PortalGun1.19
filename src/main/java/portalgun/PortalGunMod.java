@@ -88,7 +88,9 @@ public class PortalGunMod implements ModInitializer {
     }
     
     public static boolean isAreaClear(Level world, IntBox airBox1) {
-        return airBox1.fastStream().allMatch(p -> world.getBlockState(p).isAir());
+        return airBox1.fastStream().allMatch(
+            p -> world.getBlockState(p).getCollisionShape(world, p).isEmpty()
+        );
     }
     
     @Override
