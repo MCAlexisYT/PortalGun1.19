@@ -2,18 +2,25 @@ package portalgun;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import portalgun.recipe.PortalGunRechargeRecipe;
+import qouteall.imm_ptl.peripheral.CommandStickItem;
+import qouteall.imm_ptl.peripheral.PeripheralModMain;
+import qouteall.imm_ptl.peripheral.wand.PortalWandItem;
 import qouteall.q_misc_util.my_util.IntBox;
 import portalgun.config.PortalGunConfig;
 import portalgun.entities.CustomPortal;
@@ -24,13 +31,13 @@ import portalgun.misc.BlockList;
 import java.util.List;
 
 public class PortalGunMod implements ModInitializer {
+    public static final Logger LOGGER = LogManager.getLogger();
+    
     public static final String MODID = "portalgun";
-    public static final String KEY = MODID + ":portalgun_portals";
     public static final String MOD_NAME = "PortalGun Mod";
     
     public static final double portalOffset = 0.001;
     public static final double portalOverlayOffset = 0.001;
-    
     
     public static final PortalGunItem PORTAL_GUN = new PortalGunItem(new FabricItemSettings().fireResistant().stacksTo(1).rarity(Rarity.EPIC));
     public static final Item PORTAL_GUN_BODY = new Item(new FabricItemSettings().fireResistant().stacksTo(1).rarity(Rarity.RARE));
@@ -46,7 +53,29 @@ public class PortalGunMod implements ModInitializer {
     public static final SoundEvent PORTAL_OPEN_EVENT = SoundEvent.createVariableRangeEvent(PORTAL_OPEN);
     public static final SoundEvent PORTAL_CLOSE_EVENT = SoundEvent.createVariableRangeEvent(PORTAL_CLOSE);
     
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final CreativeModeTab TAB =
+        FabricItemGroup.builder()
+            .icon(() -> new ItemStack(PortalGunMod.PORTAL_GUN))
+            .title(Component.translatable("portalgun.item_group"))
+            .displayItems((enabledFeatures, entries) -> {
+                int maxEnergy = PortalGunConfig.get().maxEnergy;
+                
+                entries.accept(new PortalGunItem.ItemInfo(
+                    BlockList.createDefault(), 0, 0
+                ).toStack());
+                
+                entries.accept(new PortalGunItem.ItemInfo(
+                    new BlockList(List.of("minecraft:quartz_block")), 0, 0
+                ).toStack());
+                
+                entries.accept(new PortalGunItem.ItemInfo(
+                    BlockList.createDefault(), maxEnergy, maxEnergy
+                ).toStack());
+                
+                entries.accept(PORTAL_GUN_CLAW);
+                entries.accept(PORTAL_GUN_BODY);
+            })
+            .build();
     
     public static ResourceLocation id(String path) {
         return new ResourceLocation(MODID, path);
@@ -62,7 +91,9 @@ public class PortalGunMod implements ModInitializer {
         Registry.register(BuiltInRegistries.ITEM, id("portalgun_body"), PORTAL_GUN_BODY);
         Registry.register(BuiltInRegistries.ITEM, id("portalgun_claw"), PORTAL_GUN_CLAW);
         
-        Registry.register(BuiltInRegistries.ENTITY_TYPE, id("custom_portal"), CustomPortal.entityType);
+        Registry.register(
+            BuiltInRegistries.ENTITY_TYPE, id("custom_portal"), CustomPortal.entityType
+        );
         
         Registry.register(BuiltInRegistries.SOUND_EVENT, PORTAL1_SHOOT, PORTAL1_SHOOT_EVENT);
         Registry.register(BuiltInRegistries.SOUND_EVENT, PORTAL2_SHOOT, PORTAL2_SHOOT_EVENT);
@@ -73,21 +104,10 @@ public class PortalGunMod implements ModInitializer {
         
         PortalGunRechargeRecipe.init();
         
-        // add into creative inventory
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
-            int maxEnergy = PortalGunConfig.get().maxEnergy;
-            
-            entries.accept(new PortalGunItem.ItemInfo(
-                BlockList.createDefault(), 0, 0
-            ).toStack());
-            
-            entries.accept(new PortalGunItem.ItemInfo(
-                new BlockList(List.of("minecraft:quartz_block")), 0, 0
-            ).toStack());
-            
-            entries.accept(new PortalGunItem.ItemInfo(
-                BlockList.createDefault(), maxEnergy, maxEnergy
-            ).toStack());
-        });
+        Registry.register(
+            BuiltInRegistries.CREATIVE_MODE_TAB,
+            id("general"),
+            TAB
+        );
     }
 }

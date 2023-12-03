@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import qouteall.imm_ptl.core.CHelper;
 import qouteall.q_misc_util.my_util.DQuaternion;
 import portalgun.PortalGunMod;
@@ -27,7 +28,10 @@ public class CustomPortalEntityRenderer extends EntityRenderer<CustomPortal> {
     }
     
     @Override
-    public void render(CustomPortal entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
+    public void render(
+        @NotNull CustomPortal entity, float yaw, float tickDelta,
+        @NotNull PoseStack matrices, @NotNull MultiBufferSource vertexConsumers, int light
+    ) {
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
         
         // don't render overlay from back side
@@ -43,11 +47,9 @@ public class CustomPortalEntityRenderer extends EntityRenderer<CustomPortal> {
         matrices.last().normal().rotate(DQuaternion.rotationByDegrees(new Vec3(1, 0, 0), -90).toMcQuaternion());
         matrices.last().pose().rotate(entity.getOrientationRotation().toMcQuaternion());
         
-        // don't do this
-//        matrices.mulPose(entity.getOrientationRotation().toMcQuaternion());
         matrices.translate(0, 0, PortalGunMod.portalOverlayOffset);
         
-        int color = entity.descriptor.side().getColorInt();
+        int color = entity.getColor();
         
         int r = (color & 0xFF0000) >> 16;
         int g = (color & 0xFF00) >> 8;
@@ -63,11 +65,13 @@ public class CustomPortalEntityRenderer extends EntityRenderer<CustomPortal> {
     }
     
     @Override
-    public ResourceLocation getTextureLocation(CustomPortal entity) {
+    public @NotNull ResourceLocation getTextureLocation(CustomPortal entity) {
         return entity.isVisible() ? OVERLAY_FRAME : OVERLAY_FILLED;
     }
     
-    private static final ResourceLocation OVERLAY_FRAME = id("textures/entity/overlay_frame.png");
-    private static final ResourceLocation OVERLAY_FILLED = id("textures/entity/overlay_filled.png");
+    private static final ResourceLocation OVERLAY_FRAME =
+        id("textures/entity/overlay_frame.png");
+    private static final ResourceLocation OVERLAY_FILLED =
+        id("textures/entity/overlay_filled.png");
     
 }

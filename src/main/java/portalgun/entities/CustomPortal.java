@@ -172,4 +172,8 @@ public class CustomPortal extends Portal {
         );
     }
     
+    public int getColor() {
+        return this.descriptor.side().getColorInt();
+    }
+    
 }

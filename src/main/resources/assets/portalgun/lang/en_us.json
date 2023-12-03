@@ -13,5 +13,6 @@
   "text.autoconfig.portalgun.title": "Portal Gun Fabric Options",
   "portal_gun.limit_allowed_blocks": "Only works on these blocks:",
   "portal_gun.out_of_energy": "Out of energy. Recharge it using nether star by crafting.",
-  "portal_gun.remaining_energy": "Energy: %s / %s"
+  "portal_gun.remaining_energy": "Energy: %s / %s",
+  "portalgun.item_group": "Portal Gun"
 }
