@@ -437,10 +437,7 @@ public class PortalGunItem extends Item implements GeoItem {
         PortalManipulation.makePortalRound(portal, 20);
         portal.disableDefaultAnimation();
         
-        Integer customColor = itemInfo.getCustomColor(side);
-        if (customColor != null) {
-            portal.customColor = customColor;
-        }
+        portal.customColor = itemInfo.getCustomColor(side);
         
         if (otherSideInfo == null) {
             // it's unpaired, invisible and not teleportable
