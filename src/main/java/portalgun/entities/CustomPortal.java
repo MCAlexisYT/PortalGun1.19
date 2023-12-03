@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import qouteall.imm_ptl.core.portal.Portal;
 import qouteall.q_misc_util.my_util.IntBox;
 import portalgun.PortalGunMod;
@@ -37,6 +38,8 @@ public class CustomPortal extends Portal {
     public int thisSideUpdateCounter = 0;
     public int otherSideUpdateCounter = 0;
     
+    public @Nullable Integer customColor;
+    
     private BiPredicate<Level, BlockPos> wallPredicate;
     
     public CustomPortal(@NotNull EntityType<?> entityType, net.minecraft.world.level.Level world) {
@@ -52,6 +55,7 @@ public class CustomPortal extends Portal {
         setAllowedBlocks(BlockList.fromTag(compoundTag.getList("allowedBlocks", Tag.TAG_STRING)));
         thisSideUpdateCounter = compoundTag.getInt("thisSideUpdateCounter");
         otherSideUpdateCounter = compoundTag.getInt("otherSideUpdateCounter");
+        customColor = PortalGunMod.parseColorTag(compoundTag.get("customColor"));
     }
     
     @Override
@@ -63,6 +67,9 @@ public class CustomPortal extends Portal {
         compoundTag.put("allowedBlocks", allowedBlocks.toTag());
         compoundTag.putInt("thisSideUpdateCounter", thisSideUpdateCounter);
         compoundTag.putInt("otherSideUpdateCounter", otherSideUpdateCounter);
+        if (customColor != null) {
+            compoundTag.putInt("customColor", customColor);
+        }
     }
     
     @Override
@@ -173,6 +180,10 @@ public class CustomPortal extends Portal {
     }
     
     public int getColor() {
+        if (customColor != null) {
+            return customColor;
+        }
+        
         return this.descriptor.side().getColorInt();
     }
     

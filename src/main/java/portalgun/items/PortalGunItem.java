@@ -7,6 +7,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -29,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import portalgun.config.PortalGunConfig;
 import qouteall.imm_ptl.core.IPGlobal;
 import qouteall.imm_ptl.core.McHelper;
@@ -81,14 +84,24 @@ public class PortalGunItem extends Item implements GeoItem {
         SingletonGeoAnimatable.registerSyncedAnimatable(this);
     }
     
-    // example command: /give @p portalgun:portal_gun{allowedBlocks:["#minecraft:ice","minecraft:stone"]} 1
+    // example command:
+    // /give @p portalgun:portal_gun{allowedBlocks:["#minecraft:ice","minecraft:stone"]}
+    // /give @p portalgun:portal_gun{side1Color:"#32a852",side2Color:"purple"}
+    // /give @p portalgun:portal_gun{maxEnergy:0}
     public static final class ItemInfo {
-        public BlockList allowedBlocks;
+        public @NotNull BlockList allowedBlocks;
+        
+        /**
+         * 0 for infinite energy
+         */
         public int maxEnergy;
         public int remainingEnergy;
         
+        public @Nullable Integer side1Color;
+        public @Nullable Integer side2Color;
+        
         public ItemInfo(
-            BlockList allowedBlocks,
+            @NotNull BlockList allowedBlocks,
             int maxEnergy, // 0 for infinite energy
             int remainingEnergy
         ) {
@@ -97,13 +110,31 @@ public class PortalGunItem extends Item implements GeoItem {
             this.remainingEnergy = remainingEnergy;
         }
         
+        public ItemInfo(
+            @NotNull BlockList allowedBlocks, int maxEnergy, int remainingEnergy,
+            @Nullable Integer side1Color, @Nullable Integer side2Color
+        ) {
+            this.allowedBlocks = allowedBlocks;
+            this.maxEnergy = maxEnergy;
+            this.remainingEnergy = remainingEnergy;
+            this.side1Color = side1Color;
+            this.side2Color = side2Color;
+        }
+        
         public static ItemInfo fromTag(CompoundTag tag) {
+            BlockList allowedBlocks =
+                BlockList.fromTag(tag.getList("allowedBlocks", Tag.TAG_STRING));
+            int maxEnergy = tag.contains("maxEnergy") ?
+                tag.getInt("maxEnergy") : PortalGunConfig.get().maxEnergy;
+            
+            int remainingEnergy = tag.contains("remainingEnergy") ?
+                tag.getInt("remainingEnergy") : PortalGunConfig.get().maxEnergy;
+            
+            @Nullable Integer side1Color = PortalGunMod.parseColorTag(tag.get("side1Color"));
+            @Nullable Integer side2Color = PortalGunMod.parseColorTag(tag.get("side2Color"));
+            
             return new ItemInfo(
-                BlockList.fromTag(tag.getList("allowedBlocks", Tag.TAG_STRING)),
-                tag.contains("maxEnergy") ?
-                    tag.getInt("maxEnergy") : PortalGunConfig.get().maxEnergy,
-                tag.contains("remainingEnergy") ?
-                    tag.getInt("remainingEnergy") : PortalGunConfig.get().maxEnergy
+                allowedBlocks, maxEnergy, remainingEnergy, side1Color, side2Color
             );
         }
         
@@ -112,6 +143,12 @@ public class PortalGunItem extends Item implements GeoItem {
             tag.put("allowedBlocks", allowedBlocks.toTag());
             tag.putInt("maxEnergy", maxEnergy);
             tag.putInt("remainingEnergy", remainingEnergy);
+            if (side1Color != null) {
+                tag.putInt("side1Color", side1Color);
+            }
+            if (side2Color != null) {
+                tag.putInt("side2Color", side2Color);
+            }
             return tag;
         }
         
@@ -125,29 +162,32 @@ public class PortalGunItem extends Item implements GeoItem {
             return this.maxEnergy != 0;
         }
         
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (ItemInfo) obj;
-            return Objects.equals(this.allowedBlocks, that.allowedBlocks) &&
-                this.maxEnergy == that.maxEnergy &&
-                this.remainingEnergy == that.remainingEnergy;
+        public @Nullable Integer getCustomColor(PortalGunRecord.PortalGunSide side) {
+            return switch (side) {
+                case blue -> side1Color;
+                case orange -> side2Color;
+            };
         }
         
-        @Override
-        public int hashCode() {
-            return Objects.hash(allowedBlocks, maxEnergy, remainingEnergy);
+        public int getColor(PortalGunRecord.PortalGunSide side) {
+            Integer customColor = getCustomColor(side);
+            if (customColor != null) {
+                return customColor;
+            }
+            
+            return side.getColorInt();
         }
         
         @Override
         public String toString() {
-            return "ItemInfo[" +
-                "allowedBlocks=" + allowedBlocks + ", " +
-                "maxEnergy=" + maxEnergy + ", " +
-                "remainingEnergy=" + remainingEnergy + ']';
+            return "ItemInfo{" +
+                "allowedBlocks=" + allowedBlocks +
+                ", maxEnergy=" + maxEnergy +
+                ", remainingEnergy=" + remainingEnergy +
+                ", side1Color=" + side1Color +
+                ", side2Color=" + side2Color +
+                '}';
         }
-        
     }
     
     // Utilise our own render hook to define our custom renderer
@@ -238,6 +278,20 @@ public class PortalGunItem extends Item implements GeoItem {
             tooltip.add(Component.translatable(
                 "portal_gun.remaining_energy", itemInfo.remainingEnergy, itemInfo.maxEnergy
             ));
+        }
+        
+        if (itemInfo.side1Color != null || itemInfo.side2Color != null) {
+            Style s1 = Style.EMPTY.withColor(
+                itemInfo.getColor(PortalGunRecord.PortalGunSide.blue)
+            );
+            Style s2 = Style.EMPTY.withColor(
+                itemInfo.getColor(PortalGunRecord.PortalGunSide.orange)
+            );
+            
+            MutableComponent t1 = Component.literal("█").setStyle(s1);
+            MutableComponent t2 = Component.literal("█").setStyle(s2);
+            
+            tooltip.add(Component.empty().append(t1).append(" ").append(t2));
         }
     }
     
@@ -382,6 +436,11 @@ public class PortalGunItem extends Item implements GeoItem {
         portal.otherSideUpdateCounter = otherSideInfo == null ? 0 : otherSideInfo.updateCounter();
         PortalManipulation.makePortalRound(portal, 20);
         portal.disableDefaultAnimation();
+        
+        Integer customColor = itemInfo.getCustomColor(side);
+        if (customColor != null) {
+            portal.customColor = customColor;
+        }
         
         if (otherSideInfo == null) {
             // it's unpaired, invisible and not teleportable

@@ -6,11 +6,16 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -28,6 +33,7 @@ import portalgun.items.ClawItem;
 import portalgun.items.PortalGunItem;
 import portalgun.misc.BlockList;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class PortalGunMod implements ModInitializer {
@@ -109,5 +115,38 @@ public class PortalGunMod implements ModInitializer {
             id("general"),
             TAB
         );
+    }
+    
+    public static @Nullable Integer parseColorTag(@Nullable Tag tag) {
+        if (tag == null) {
+            return null;
+        }
+        
+        if (tag instanceof StringTag stringTag) {
+            String value = stringTag.getAsString();
+            
+            if (value.startsWith("#")) {
+                String hex = value.substring(1);
+                try {
+                    return Integer.parseUnsignedInt(hex, 16);
+                }
+                catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            
+            DyeColor dyeColor = DyeColor.byName(value, null);
+            if (dyeColor != null) {
+                return dyeColor.getTextColor();
+            }
+            
+            return null;
+        }
+        
+        if (tag instanceof NumericTag numericTag) {
+            return numericTag.getAsInt();
+        }
+        
+        return null;
     }
 }
