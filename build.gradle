@@ -1,7 +1,8 @@
 plugins {
     id 'fabric-loom' version '1.3-SNAPSHOT'
     id 'maven-publish'
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+
+    id "me.modmuss50.mod-publish-plugin" version "0.3.5"
 }
 
 repositories {
@@ -93,6 +94,10 @@ dependencies {
     }
     modImplementation "maven.modrinth:modmenu:${modmenu_version}"
 
+//    modImplementation("com.github.qouteall:GravityChanger:v1.2.0-mc1.20.2") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
+
 //    modImplementation "maven.modrinth:sodium:mc1.20.1-0.5.2"
 
 //    modImplementation 'maven.modrinth:iris:1.6.1+1.19.4'
@@ -135,13 +140,6 @@ afterEvaluate {
     }
 }
 
-task additionalCopy(type: Copy) {
-    dependsOn(remapJar)
-    from file("${project.buildDir}/libs/$archivesBaseName-${version}-mc${project.minecraft_version}-fabric.jar")
-    into file("${project.buildDir}/to_upload")
-    rename { n -> "$archivesBaseName-${version}-mc${project.minecraft_version}-fabric.jar" }
-}
-
 // configure the maven publication
 publishing {
     publications {
@@ -156,5 +154,35 @@ publishing {
         // Notice: This block does NOT have the same function as the block in the top level.
         // The repositories here will be used for publishing your artifact, not for
         // retrieving dependencies.
+    }
+}
+
+publishMods {
+    file = remapJar.archiveFile
+    changelog = file("changelog.md").text
+    type = ALPHA
+    modLoaders.add("fabric")
+
+    displayName = "v${project.mod_version}-mc${project.minecraft_version}"
+    version = "v${project.mod_version}-mc${project.minecraft_version}"
+
+    curseforge {
+        projectId = "839380"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add(minecraft_version)
+
+        requires {
+            slug = "immersive-portals-mod"
+        }
+    }
+    modrinth {
+        projectId = "n1B6JCKV"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.add(minecraft_version)
+    }
+    github {
+        repository = "iPortalTeam/PortalGun"
+        accessToken = providers.environmentVariable("GITHUB_TOKEN")
+        commitish = minecraft_version // the branch name is the same as minecraft version
     }
 }
