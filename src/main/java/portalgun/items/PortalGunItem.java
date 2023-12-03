@@ -464,7 +464,7 @@ public class PortalGunItem extends Item implements GeoItem {
         Direction wallFacing = blockHit.getDirection();
         
         Direction playerGravity = GravityChangerInterface.invoker.getGravityDirection(player);
-        Direction transformedGravity = raytraceResult.portalsPassingThrough().stream().reduce(
+        Direction effectiveGravity = raytraceResult.portalsPassingThrough().stream().reduce(
             playerGravity,
             (gravity, portal) -> portal.getTeleportedGravityDirection(gravity),
             (g1, g2) -> {throw new RuntimeException();}
@@ -476,26 +476,30 @@ public class PortalGunItem extends Item implements GeoItem {
             (v1, v2) -> {throw new RuntimeException();}
         );
         
-        Vec3 viewVectorLocal = GravityChangerInterface.invoker
-            .transformWorldToPlayer(transformedGravity, transformedViewVector);
+        Vec3 localViewVector = GravityChangerInterface.invoker
+            .transformWorldToPlayer(effectiveGravity, transformedViewVector);
         
-        Direction wallFacingLocal = GravityChangerInterface.invoker
-            .transformDirWorldToPlayer(transformedGravity, wallFacing);
+        Direction localWallFacing = GravityChangerInterface.invoker
+            .transformDirWorldToPlayer(effectiveGravity, wallFacing);
         
-        Direction[] upDirCandidates = Helper.getAnotherFourDirections(wallFacingLocal.getAxis());
+        Direction[] localUpDirCandidates =
+            Helper.getAnotherFourDirections(localWallFacing.getAxis());
         
-        Arrays.sort(upDirCandidates, Comparator.comparingDouble((Direction dir) -> {
+        Arrays.sort(localUpDirCandidates, Comparator.comparingDouble((Direction dir) -> {
             if (dir == Direction.UP) {
                 // the local up direction has the highest priority
                 return 1;
             }
             // horizontal dot product
-            return dir.getNormal().getX() * viewVectorLocal.x + dir.getNormal().getZ() * viewVectorLocal.z;
+            return dir.getNormal().getX() * localViewVector.x + dir.getNormal().getZ() * localViewVector.z;
         }).reversed());
         
         BlockPos portalAreaSize = new BlockPos(kind.getWidth(), kind.getHeight(), 1);
         
-        for (Direction upDir : upDirCandidates) {
+        for (Direction localUpDir : localUpDirCandidates) {
+            Direction upDir = GravityChangerInterface.invoker
+                .transformDirPlayerToWorld(effectiveGravity, localUpDir);
+            
             AARotation rot = AARotation.getAARotationFromYZ(upDir, wallFacing);
             BlockPos transformedSize = rot.transform(portalAreaSize);
             IntBox portalArea = IntBox.getBoxByPosAndSignedSize(interactingAirPos, transformedSize);
