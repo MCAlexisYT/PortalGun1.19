@@ -100,6 +100,8 @@ public class PortalGunItem extends Item implements GeoItem {
         public @Nullable Integer side1Color;
         public @Nullable Integer side2Color;
         
+        public boolean transformGravity = false;
+        
         public ItemInfo(
             @NotNull BlockList allowedBlocks,
             int maxEnergy, // 0 for infinite energy
@@ -112,13 +114,15 @@ public class PortalGunItem extends Item implements GeoItem {
         
         public ItemInfo(
             @NotNull BlockList allowedBlocks, int maxEnergy, int remainingEnergy,
-            @Nullable Integer side1Color, @Nullable Integer side2Color
+            @Nullable Integer side1Color, @Nullable Integer side2Color,
+            boolean transformGravity
         ) {
             this.allowedBlocks = allowedBlocks;
             this.maxEnergy = maxEnergy;
             this.remainingEnergy = remainingEnergy;
             this.side1Color = side1Color;
             this.side2Color = side2Color;
+            this.transformGravity = transformGravity;
         }
         
         public static ItemInfo fromTag(CompoundTag tag) {
@@ -133,8 +137,12 @@ public class PortalGunItem extends Item implements GeoItem {
             @Nullable Integer side1Color = PortalGunMod.parseColorTag(tag.get("side1Color"));
             @Nullable Integer side2Color = PortalGunMod.parseColorTag(tag.get("side2Color"));
             
+            boolean transformGravity = tag.contains("transformGravity") ?
+                tag.getBoolean("transformGravity") : false;
+            
             return new ItemInfo(
-                allowedBlocks, maxEnergy, remainingEnergy, side1Color, side2Color
+                allowedBlocks, maxEnergy, remainingEnergy, side1Color, side2Color,
+                transformGravity
             );
         }
         
@@ -149,6 +157,7 @@ public class PortalGunItem extends Item implements GeoItem {
             if (side2Color != null) {
                 tag.putInt("side2Color", side2Color);
             }
+            tag.putBoolean("transformGravity", transformGravity);
             return tag;
         }
         
@@ -251,7 +260,10 @@ public class PortalGunItem extends Item implements GeoItem {
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
+    public void appendHoverText(
+        @NotNull ItemStack stack, @Nullable Level world,
+        @NotNull List<Component> tooltip, @NotNull TooltipFlag context
+    ) {
         super.appendHoverText(stack, world, tooltip, context);
         
         tooltip.add(Component.translatable("item.portalgun.portal_gun_desc").withStyle(ChatFormatting.GOLD));
@@ -292,6 +304,13 @@ public class PortalGunItem extends Item implements GeoItem {
             MutableComponent t2 = Component.literal("█").setStyle(s2);
             
             tooltip.add(Component.empty().append(t1).append(" ").append(t2));
+        }
+        
+        if (itemInfo.transformGravity) {
+            tooltip.add(
+                Component.translatable("portal_gun.transform_gravity")
+                    .withStyle(ChatFormatting.AQUA)
+            );
         }
     }
     
@@ -418,7 +437,7 @@ public class PortalGunItem extends Item implements GeoItem {
         
         if (portal == null) {
             portal = CustomPortal.entityType.create(world);
-            Validate.notNull(portal);
+            assert portal != null;
         }
         
         portal.setOriginPos(newPortalOrigin);
@@ -438,6 +457,7 @@ public class PortalGunItem extends Item implements GeoItem {
         portal.disableDefaultAnimation();
         
         portal.customColor = itemInfo.getCustomColor(side);
+        portal.setTeleportChangesGravity(itemInfo.transformGravity);
         
         if (otherSideInfo == null) {
             // it's unpaired, invisible and not teleportable

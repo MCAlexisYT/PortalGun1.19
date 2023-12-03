@@ -67,15 +67,23 @@ public class PortalGunMod implements ModInitializer {
                 int maxEnergy = PortalGunConfig.get().maxEnergy;
                 
                 entries.accept(new PortalGunItem.ItemInfo(
+                    BlockList.createDefault(), maxEnergy, maxEnergy,
+                    null, null, false
+                ).toStack());
+                
+                entries.accept(new PortalGunItem.ItemInfo(
                     BlockList.createDefault(), 0, 0
                 ).toStack());
                 
                 entries.accept(new PortalGunItem.ItemInfo(
-                    new BlockList(List.of("minecraft:quartz_block")), 0, 0
+                    new BlockList(List.of("minecraft:quartz_block")),
+                    0, 0
                 ).toStack());
                 
                 entries.accept(new PortalGunItem.ItemInfo(
-                    BlockList.createDefault(), maxEnergy, maxEnergy
+                    BlockList.createDefault(),
+                    0, 0,
+                    0x30E551, 0xE600C6, true
                 ).toStack());
                 
                 entries.accept(PORTAL_GUN_CLAW);
