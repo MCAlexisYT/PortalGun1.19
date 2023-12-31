@@ -1,5 +1,6 @@
 package portalgun;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
@@ -12,7 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import qouteall.q_misc_util.Helper;
 import qouteall.q_misc_util.MiscHelper;
-import qouteall.q_misc_util.dimension.DimId;
 import qouteall.q_misc_util.my_util.DQuaternion;
 
 import java.util.HashMap;
@@ -121,7 +121,10 @@ public class PortalGunRecord extends SavedData {
         static PortalInfo fromTag(CompoundTag tag) {
             return new PortalInfo(
                 tag.getUUID("portalId"),
-                DimId.idToKey(new ResourceLocation(tag.getString("portalDim"))),
+                ResourceKey.create(
+                    Registries.DIMENSION,
+                    new ResourceLocation(tag.getString("portalDim"))
+                ),
                 new Vec3(
                     tag.getDouble("portalPosX"),
                     tag.getDouble("portalPosY"),

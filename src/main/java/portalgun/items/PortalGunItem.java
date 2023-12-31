@@ -464,7 +464,7 @@ public class PortalGunItem extends Item implements GeoItem {
             portal.setDestinationDimension(world.dimension());
             portal.setDestination(newPortalOrigin.add(0, 10, 0));
             portal.setIsVisible(false);
-            portal.teleportable = false;
+            portal.setTeleportable(false);
         }
         else {
             // it's linked
@@ -472,7 +472,7 @@ public class PortalGunItem extends Item implements GeoItem {
             portal.setDestination(otherSideInfo.portalPos());
             portal.setOtherSideOrientation(otherSideInfo.portalOrientation());
             portal.setIsVisible(true);
-            portal.teleportable = true;
+            portal.setTeleportable(true);
             player.level().playSound(
                 null,
                 player.getX(), player.getY(), player.getZ(),
@@ -631,7 +631,7 @@ public class PortalGunItem extends Item implements GeoItem {
     }
     
     @Override
-    public int getBarColor(ItemStack stack) {
+    public int getBarColor(@NotNull ItemStack stack) {
         return 0x00d907e0;
     }
 }

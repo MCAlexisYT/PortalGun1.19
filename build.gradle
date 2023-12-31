@@ -74,9 +74,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:${immptl_version}")
-    modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:${immptl_version}")
-    modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:build:${immptl_version}")
+    modImplementation ("com.github.iPortalTeam:ImmersivePortalsMod:${immptl_version}")
 
     // maven local
 //    modImplementation "qouteall:imm_ptl_20:3.1.2.1"
@@ -94,9 +92,10 @@ dependencies {
     }
     modImplementation "maven.modrinth:modmenu:${modmenu_version}"
 
-    modLocalRuntime("com.github.qouteall:GravityChanger:v1.2.0-mc1.20.2") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    modLocalRuntime("com.github.qouteall:GravityChanger:v1.2.0-mc1.20.2") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//        transitive=false
+//    }
 
 //    modImplementation "maven.modrinth:sodium:mc1.20.1-0.5.2"
 
