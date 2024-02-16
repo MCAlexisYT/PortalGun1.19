@@ -66,10 +66,13 @@ public class PortalGunMod implements ModInitializer {
             .displayItems((enabledFeatures, entries) -> {
                 int maxEnergy = PortalGunConfig.get().maxEnergy;
                 
-                entries.accept(new PortalGunItem.ItemInfo(
-                    BlockList.createDefault(), maxEnergy, maxEnergy,
-                    null, null, false
-                ).toStack());
+                // avoid item duplication https://github.com/iPortalTeam/PortalGun/issues/10
+                if (maxEnergy != 0) {
+                    entries.accept(new PortalGunItem.ItemInfo(
+                        BlockList.createDefault(), maxEnergy, maxEnergy,
+                        null, null, false
+                    ).toStack());
+                }
                 
                 entries.accept(new PortalGunItem.ItemInfo(
                     BlockList.createDefault(), 0, 0
