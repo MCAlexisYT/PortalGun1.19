@@ -1,1 +1,1 @@
-Upgrade to MC 1.20.4
+possibly fix compat issue with cc:tweaked when maxEnergy is 0
