@@ -64,7 +64,7 @@ dependencies {
         officialMojangMappings() {
             setNameSyntheticMembers(false)
         }
-        parchment("org.parchmentmc.data:parchment-1.19.3:2022.12.18")
+        parchment("org.parchmentmc.data:parchment-1.19.2:2022.12.18")
     }
 
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -72,15 +72,15 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation ('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.3'){
+    modImplementation ('com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:v2.5.2-mc1.19.2'){
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modImplementation ('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.5.2-mc1.19.3'){
+    modImplementation ('com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:v2.5.2-mc1.19.2'){
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    modImplementation ('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.5.2-mc1.19.3'){
+    modImplementation ('com.github.iPortalTeam.ImmersivePortalsMod:build:v2.5.2-mc1.19.2'){
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
@@ -100,7 +100,7 @@ dependencies {
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
-    modImplementation ('software.bernie.geckolib:geckolib-fabric-1.19.3:4.0.4') {
+    modImplementation ('software.bernie.geckolib:geckolib-fabric-1.19.2:4.0.4') {
         transitive(false)
     }
 
@@ -110,7 +110,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    modImplementation "maven.modrinth:sodium:mc1.19.3-0.4.9"
+    modImplementation "maven.modrinth:sodium:mc1.19.2-0.4.9"
 }
 processResources {
     inputs.property "version", project.version
